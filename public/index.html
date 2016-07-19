@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<!--
+	Overflow by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Colorize Photos | Tô Màu Ảnh</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+        <link rel="stylesheet" href="assets/css/ladda.min.css"/>
+        <link rel="stylesheet" href="assets/css/jquery.imageReveal.min.css"/>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"> <!-- jQuery Mobile Style -->
+    </head>
+	<body>
+
+		<!-- Header -->
+			<section id="header">
+				<header>
+					<h1>Colorize Photos</h1>
+					<p>Chuyển Ảnh Đen Trắng Sang Ảnh Màu</p>
+				</header>
+                <form method="post" action="demoform.asp">
+                    <input type="text" name="imgUrl" id="imgUrl" placeholder="Dán URL ảnh vào đây." style="width: 75%;display: block;margin-left: auto;margin-right: auto;">
+                </form>
+                <br>
+                <button class="ladda-button my-button" data-color="red" data-style="slide-up" data-size="1" onclick="callColorize()"><span class="ladda-label">Chuyển Đổi</span></button>
+
+                <footer>
+
+              	</footer>
+			</section>
+
+		<!-- Banner -->
+			<section id="banner">
+				<header>
+					<h2>Kết Quả</h2>
+				</header>
+				<figure>
+					<div id="twoface-demo"></div>
+				</figure>
+				<footer>
+					<a class="ladda-button my-button-dl" data-color="red" data-style="slide-up" data-size="1" href="#">Tải Về</a>
+				</footer>
+			</section>
+
+        <!-- Footer -->
+		<section id="footer">
+			<p>Tôi đã sử dụng <a href="http://richzhang.github.io/colorization/" >Image Colorization algorithm created by Richard Zhang, Phillip Isola, and Alexei A. Efros..</a></p>
+			<div class="copyright">
+				<ul class="menu">
+					<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+				</ul>
+			</div>
+		</section>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.poptrox.min.js"></script>
+            <script src="assets/js/jquery.imageReveal.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+            <script src="assets/js/twoface.js"></script>
+            <script src="assets/js/spin.min.js"></script>
+            <script src="assets/js/ladda.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+            <script>
+                var isSuccess = false, linkDownload;
+                var twoface = TwoFace('twoface-demo', 600, 480);
+                var l = Ladda.create( document.querySelector( '.my-button' ) );
+                    
+                $('#twoface-demo').hide();
+
+                function callColorize() {
+                    
+                    l.start();
+                    l.setProgress( 0.5 );
+
+                    var img = document.getElementById("imgUrl").value;
+                    img = img.trim();
+
+                    var isImgUrl = checkURL(img);
+                    if(isImgUrl){
+                        $.post("/colorize",{
+                           url : img
+                        },function (data,status) {
+
+                            console.log("OUTPUT: ",data);
+
+                            var imgOriginal = "data:image/png;base64," + data.result[0];
+                            var imgColorized = "data:image/png;base64," + data.result[1];
+                            
+                            twoface.add(imgOriginal);
+                            twoface.add(imgColorized);
+                            $('#twoface-demo').show();
+
+                            l.stop();
+
+                           	creatLinkDownload(data.result[2]);
+                            
+                        });
+                    }
+                    else {
+                        alert("Hãy Nhập URL Ảnh Nhé!");
+                        l.stop();
+                        return false;
+                    }
+                }
+                function creatLinkDownload(url) {
+                	$('.my-button-dl').attr({target: '_blank',
+                    href  : url});
+                }
+                function checkURL(url) {
+                    return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
+                }
+            </script>
+	</body>
+</html>
